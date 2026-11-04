@@ -34,7 +34,7 @@ module oled_ssd1306 #(
   reg [POWER_WIDTH-1:0] power_count;
   reg [2:0] bit_index;
   reg [10:0] byte_index;
-  reg data_mode;
+  reg data_mode, initialized, init_sequence;
   reg [7:0] tx_byte;
   reg [7:0] temp_buf, humidity_buf;
   reg [8:0] distance_buf;
@@ -42,34 +42,34 @@ module oled_ssd1306 #(
   wire tick = (divider == DIV - 1);
   wire [10:0] pixel_index = byte_index - 2;
 
-  // Five-column, seven-pixel font, one byte per vertical column.
-  function [39:0] glyph;
+  // 각 문자는 왼쪽 열부터 12비트씩 총 8열(96비트)로 정의한다.
+  function [95:0] glyph;
     input [7:0] c;
     begin
       case (c)
-        "0": glyph = 40'h3e4551493e;
-        "1": glyph = 40'h00427f4000;
-        "2": glyph = 40'h4649516142;
-        "3": glyph = 40'h3641494102;
-        "4": glyph = 40'h7f100c0a08;
-        "5": glyph = 40'h3949494927;
-        "6": glyph = 40'h3049494a3c;
-        "7": glyph = 40'h0305790101;
-        "8": glyph = 40'h3649494936;
-        "9": glyph = 40'h1e29494906;
-        "T": glyph = 40'h01017f0101;
-        "E": glyph = 40'h414949497f;
-        "M": glyph = 40'h7f020c027f;
-        "P": glyph = 40'h060909097f;
-        "H": glyph = 40'h7f0808087f;
-        "U": glyph = 40'h3f4040403f;
-        "D": glyph = 40'h3e4141417f;
-        "I": glyph = 40'h00417f4100;
-        "S": glyph = 40'h3149494946;
-        "C": glyph = 40'h224141413e;
-        ":": glyph = 40'h0000363600;
-        "-": glyph = 40'h0808080808;
-        "%": glyph = 40'h6131084643;
+        "0": glyph = 96'h3fc3fcc03c03c03c033fc3fc;
+        "1": glyph = 96'h000000c0cfffc00c00000000;
+        "2": glyph = 96'hc1cc1cc63c83f03f03c0cc0c;
+        "3": glyph = 96'h39c39cc63c63c63c63c03c03;
+        "4": glyph = 96'h0c00c00c0fff0c30ce0fc0f0;
+        "5": glyph = 96'h3e33e3c63c63c63c6331f31f;
+        "6": glyph = 96'h380380c63c63c6cc6c3f03f0;
+        "7": glyph = 96'h00701f07b1e3f83e03003003;
+        "8": glyph = 96'h39c39cc63c63c63c6339c39c;
+        "9": glyph = 96'h0fc0fc363c63c63c6301c01c;
+        "T": glyph = 96'h003003003fff003003003003;
+        "E": glyph = 96'hc03c03c63c63c63c63ffffff;
+        "M": glyph = 96'hffffff00c07000c00cffffff;
+        "P": glyph = 96'h01c01c063063063063ffffff;
+        "H": glyph = 96'hffffff060060060060ffffff;
+        "U": glyph = 96'h3ff3ffc00c00c00c003ff3ff;
+        "D": glyph = 96'h3fc3fcc03c03c03c03ffffff;
+        "I": glyph = 96'h000000c03fffc03c03000000;
+        "S": glyph = 96'h383383c63c63c63c63c1cc1c;
+        "C": glyph = 96'h30c30cc03c03c03c033fc3fc;
+        ":": glyph = 96'h00000000039c39c39c000000;
+        "-": glyph = 96'h060060060060060060060060;
+        "%": glyph = 96'h301486498320046089309406;
         default: glyph = 0;
       endcase
     end
@@ -170,33 +170,45 @@ module oled_ssd1306 #(
     end
   endfunction
 
-  // SSD1306 GDDRAM: each byte is eight vertical pixels, D0 at top.
-  // Two pages per text row: expand each glyph pixel to a 2x2 block.
+  // 8열의 비트맵 뒤에 문자 간격을 위한 빈 열을 둔다.
+  function [11:0] enlarged_column;
+    input [2:0] row;
+    input [4:0] position;
+    input [3:0] subcolumn;
+    reg [95:0] columns;
+    begin
+      columns = glyph(screen_char(row, position));
+      enlarged_column = (subcolumn < 8) ? (columns >> (subcolumn * 12)) : 12'b0;
+    end
+  endfunction
+
+  // SSD1306 GDDRAM의 각 바이트는 세로 8픽셀이다.
+  // 세 줄의 시작 위치는 위에서 각각 2, 26, 50픽셀이다.
   function [7:0] pixel;
     input [10:0] index;
     reg [6:0] column;
     reg [2:0] page;
     reg [4:0] position;
-    reg [2:0] subcolumn;
-    reg [39:0] columns;
-    reg [7:0] source_column;
-    reg [15:0] expanded;
-    integer bit_number;
+    reg [3:0] subcolumn;
+    reg [11:0] row0, row1, row2;
     begin
       column = index[6:0];
       page = index[9:7];
-      position = column / 12;
-      subcolumn = (column % 12) / 2;
-      // Pages 0-1: temperature, 2: blank, 3-4: humidity,
-      // 5: blank, 6-7: distance. Each blank page is eight pixels high.
-      if (page < 2) columns = glyph(screen_char(0, position));
-      else if (page == 3 || page == 4) columns = glyph(screen_char(1, position));
-      else if (page >= 6) columns = glyph(screen_char(2, position));
-      else columns = 0;
-      source_column = (subcolumn == 5) ? 0 : (columns >> (subcolumn * 8));
-      for (bit_number = 0; bit_number < 8; bit_number = bit_number + 1)
-      expanded[bit_number*2+:2] = {2{source_column[bit_number]}};
-      pixel = (page == 1 || page == 4 || page == 7) ? expanded[15:8] : expanded[7:0];
+      position = column / 9;
+      subcolumn = column % 9;
+      row0 = enlarged_column(0, position, subcolumn);
+      row1 = enlarged_column(1, position, subcolumn);
+      row2 = enlarged_column(2, position, subcolumn);
+      case (page)
+        0: pixel = {row0[5:0], 2'b00};
+        1: pixel = {2'b00, row0[11:6]};
+        2: pixel = 0;
+        3: pixel = {row1[5:0], 2'b00};
+        4: pixel = {2'b00, row1[11:6]};
+        5: pixel = 0;
+        6: pixel = {row2[5:0], 2'b00};
+        7: pixel = {2'b00, row2[11:6]};
+      endcase
     end
   endfunction
 
@@ -228,6 +240,8 @@ module oled_ssd1306 #(
       bit_index <= 0;
       tx_byte <= 0;
       data_mode <= 0;
+      initialized <= 0;
+      init_sequence <= 1;
       temp_buf <= 0;
       humidity_buf <= 0;
       distance_buf <= 0;
@@ -243,6 +257,7 @@ module oled_ssd1306 #(
           busy <= 1;
           error <= 0;
           data_mode <= 0;
+          init_sequence <= !initialized;
           byte_index <= 0;
           phase <= 0;
           state <= START;
@@ -270,7 +285,8 @@ module oled_ssd1306 #(
           LOAD: begin
             if (byte_index == 0) tx_byte <= 8'h78;  // 0x3c + write
             else if (byte_index == 1) tx_byte <= data_mode ? 8'h40 : 8'h00;
-            else if (!data_mode) tx_byte <= command(byte_index - 2);
+            // Refresh: only reset the column/page address window.
+            else if (!data_mode) tx_byte <= command(init_sequence ? byte_index - 2 : byte_index + 24);
             else tx_byte <= pixel(pixel_index);
             bit_index <= 7;
             phase <= 0;
@@ -311,7 +327,7 @@ module oled_ssd1306 #(
             3: begin
               scl_low <= 1;
               phase   <= 0;
-              if (error || (!data_mode && byte_index==33) ||
+              if (error || (!data_mode && byte_index==(init_sequence ? 33 : 7)) ||
                           (data_mode && byte_index==1+PAGES*128))
                 state <= STOP;
               else begin
@@ -342,6 +358,8 @@ module oled_ssd1306 #(
                 byte_index <= 0;
                 state <= START;
               end else begin
+                // Any NACK invalidates setup; next attempt reinitializes.
+                initialized <= !error;
                 busy  <= 0;
                 done  <= 1;
                 state <= IDLE;

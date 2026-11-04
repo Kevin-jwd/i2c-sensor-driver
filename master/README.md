@@ -8,10 +8,13 @@ The Master and Slave must be separate projects/boards: each contains its own
 
 - SSD1306 OLED: 128x64, 7-bit address 0x3c. Connect its SDA and SCL to the
   same JA1/JA2 I2C bus as the sensor Slave, with common ground and 3.3 V-compatible
-  power/logic. FND remains available. OLED shows TEMP, HUM and DIST with 2x (10x14 pixel) characters and 8-pixel blank lines.
+  power/logic. FND remains available. OLED shows TEMP, HUM and DIST with 8x12 pixel characters across three evenly spaced rows.
 - At power-up the OLED initializes after 100 ms and shows dashes. After each
-  successful sensor read the OLED is refreshed. A BTNC request during an OLED
-  update is queued until the bus is free. One pending request is remembered.
+  successful sensor read the OLED is refreshed. Normal refreshes keep the
+  display on and only set the RAM window and write pixels; they do not repeat
+  the display OFF/ON initialization. An I2C NACK causes full initialization on
+  the next update. A BTNC request during an OLED update is queued until the bus
+  is free. One pending request is remembered.
 - OLED module must have its own appropriate SSD1306 initialization / power
   circuit, including its charge pump. This design uses the internal charge pump.
 - BTND: reset. The Master reads the Slave automatically every 0.5 seconds;

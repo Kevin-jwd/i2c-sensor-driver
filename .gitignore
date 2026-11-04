@@ -1,2 +1,8 @@
 # Local simulation runs and PDF inspection intermediates
 /tmp/
+
+# Local AI reports and secrets
+.ai/reports/
+.env
+.env.*
+!.env.example
