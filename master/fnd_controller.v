@@ -13,10 +13,10 @@ module fnd_controller (
   wire [3:0] w_d1, w_d10, w_d100, w_d1000;
 
   fnd_digit_select u_fnd_digit_select (
-      .clk(clk),
-      .rst(rst),
+      .clk (clk),
+      .rst (rst),
       .tick(tick),
-      .sel(w_sel)
+      .sel (w_sel)
   );
 
   fnd_digit_display u_fnd_digit_display (
@@ -50,20 +50,18 @@ module fnd_digit_select (
 );
 
   always @(posedge clk or posedge rst) begin
-    if (rst)
-      sel <= 2'b00;
-    else if (tick)
-      sel <= sel + 1'b1;
+    if (rst) sel <= 2'b00;
+    else if (tick) sel <= sel + 1'b1;
   end
 
 endmodule
 
 module bin2bcd_4digit (
     input  [13:0] in_data,
-    output [3:0] d1,
-    output [3:0] d10,
-    output [3:0] d100,
-    output [3:0] d1000
+    output [ 3:0] d1,
+    output [ 3:0] d10,
+    output [ 3:0] d100,
+    output [ 3:0] d1000
 );
 
   assign d1 = in_data % 10;

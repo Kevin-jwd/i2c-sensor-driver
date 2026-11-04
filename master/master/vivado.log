@@ -1,0 +1,22 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Wed Nov  4 14:17:38 2026
+# Process ID: 3956
+# Current directory: D:/projects/i2c-sensor-driver/master/master
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent10984 D:\projects\i2c-sensor-driver\master\master\master.xpr
+# Log file: D:/projects/i2c-sensor-driver/master/master/vivado.log
+# Journal file: D:/projects/i2c-sensor-driver/master/master\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project D:/projects/i2c-sensor-driver/master/master/master.xpr
+WARNING: [filemgmt 56-3] Default IP Output Path : Could not find the directory 'D:/projects/i2c-sensor-driver/master/master/master.gen/sources_1'.
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2020.2/data/ip'.
+update_compile_order -fileset sources_1
+exit
+INFO: [Common 17-206] Exiting Vivado at Wed Nov  4 14:36:34 2026...
