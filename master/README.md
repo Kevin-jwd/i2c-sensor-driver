@@ -9,6 +9,9 @@ The Master and Slave must be separate projects/boards: each contains its own
 - SSD1306 OLED: 128x64, 7-bit address 0x3c. Connect its SDA and SCL to the
   same JA1/JA2 I2C bus as the sensor Slave, with common ground and 3.3 V-compatible
   power/logic. FND remains available. OLED shows TEMP, HUM and DIST with 8x12 pixel characters across three evenly spaced rows.
+- A distance of 50 cm or less shows sensor values; above 50 cm, OLED shows a
+  bouncing ball. Sensor polling and FND remain active in standby. The screen
+  uses the last successfully read distance; the protocol has no sensor-valid flag.
 - At power-up the OLED initializes after 100 ms and shows dashes. After each
   successful sensor read the OLED is refreshed. Normal refreshes keep the
   display on and only set the RAM window and write pixels; they do not repeat

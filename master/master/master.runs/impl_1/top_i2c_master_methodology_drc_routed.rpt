@@ -1,7 +1,7 @@
 Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2020.2 (win64) Build 3064766 Wed Nov 18 09:12:45 MST 2020
-| Date         : Wed Nov  4 16:34:00 2026
+| Date         : Thu Nov  5 09:21:44 2026
 | Host         : DESKTOP-7CFQ9ND running 64-bit major release  (build 9200)
 | Command      : report_methodology -file top_i2c_master_methodology_drc_routed.rpt -pb top_i2c_master_methodology_drc_routed.pb -rpx top_i2c_master_methodology_drc_routed.rpx
 | Design       : top_i2c_master
@@ -23,11 +23,11 @@ Table of Contents
           Floorplan: design_1
       Design limits: <entire design considered>
              Max violations: <unlimited>
-             Violations found: 39
+             Violations found: 40
 +-----------+----------+-------------------------------+------------+
 | Rule      | Severity | Description                   | Violations |
 +-----------+----------+-------------------------------+------------+
-| TIMING-16 | Warning  | Large setup violation         | 7          |
+| TIMING-16 | Warning  | Large setup violation         | 8          |
 | TIMING-18 | Warning  | Missing input or output delay | 32         |
 +-----------+----------+-------------------------------+------------+
 
@@ -35,37 +35,42 @@ Table of Contents
 -----------------
 TIMING-16#1 Warning
 Large setup violation  
-There is a large setup violation of -1.010 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[2]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.156 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[5]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-16#2 Warning
 Large setup violation  
-There is a large setup violation of -1.011 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[0]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.183 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[1]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-16#3 Warning
 Large setup violation  
-There is a large setup violation of -1.045 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[6]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.210 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[6]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-16#4 Warning
 Large setup violation  
-There is a large setup violation of -1.101 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[7]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.211 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[3]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-16#5 Warning
 Large setup violation  
-There is a large setup violation of -1.130 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[5]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.259 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[0]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-16#6 Warning
 Large setup violation  
-There is a large setup violation of -1.143 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[4]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.357 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[2]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-16#7 Warning
 Large setup violation  
-There is a large setup violation of -1.178 ns between u_oled/distance_buf_reg[2]/C (clocked by clk) and u_oled/tx_byte_reg[3]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+There is a large setup violation of -1.391 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[7]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#8 Warning
+Large setup violation  
+There is a large setup violation of -1.550 ns between u_oled/byte_index_reg[5]_replica/C (clocked by clk) and u_oled/tx_byte_reg[4]/D (clocked by clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
 Related violations: <none>
 
 TIMING-18#1 Warning

@@ -2,17 +2,17 @@
 
 // Read four bytes from the project I2C slave (no clock stretching).
 module i2c_master #(
-    parameter integer CLK_HZ = 100_000_000,
-    parameter integer I2C_HZ = 100_000,
+    parameter CLK_HZ = 100_000_000,
+    parameter I2C_HZ = 100_000,
     parameter [6:0] ADDRESS = 7'h42,
     parameter DRIVE_BUS = 1
 ) (
-    input wire clk,
+    input clk,
     rst,
     start,
-    inout wire sda,
-    output wire scl,
-    output wire sda_drive_low,
+    inout sda,
+    output scl,
+    output sda_drive_low,
     scl_drive_low,
     output reg busy,
     done,
@@ -21,8 +21,8 @@ module i2c_master #(
     humidity,
     output reg [8:0] distance
 );
-  localparam integer DIV = CLK_HZ / (I2C_HZ * 4);
-  localparam integer WIDTH = (DIV > 1) ? $clog2(DIV) : 1;
+  localparam DIV = CLK_HZ / (I2C_HZ * 4);
+  localparam WIDTH = (DIV > 1) ? $clog2(DIV) : 1;
   localparam IDLE=0, START=1, ADDRESS_BITS=2, ADDRESS_ACK=3,
                READ_BITS=4, READ_ACK=5, STOP=6;
   reg [2:0] state;

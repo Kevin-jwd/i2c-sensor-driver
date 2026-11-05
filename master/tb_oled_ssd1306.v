@@ -21,7 +21,7 @@ module tb_oled_ssd1306;
   oled_ssd1306 #(.CLK_HZ(10_000_000),.POWERUP_US(10)) dut (
     .clk(clk),.rst(rst),.start(start),.sda(sda),
     .temperature(temperature),.humidity(humidity),.distance(distance),
-    .data_valid(1'b1),.sda_low(drive_sda),.scl_low(drive_scl),
+    .data_valid(1'b1),.standby(1'b0),.sda_low(drive_sda),.scl_low(drive_scl),
     .ready(ready),.busy(busy),.done(done),.error(error));
 
   always @(negedge sda) if(scl===1'b1 && !rst) begin

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="impl_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1793777785">
+<GenRun Id="impl_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1793837961">
   <File Type="BITSTR-BMM" Name="top_i2c_slave_bd.bmm"/>
   <File Type="OPT-METHODOLOGY-DRC" Name="top_i2c_slave_methodology_drc_opted.rpt"/>
   <File Type="INIT-TIMING" Name="top_i2c_slave_timing_summary_init.rpt"/>
@@ -125,16 +125,6 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/imports/slave/tb_ultrasonic_sensor.v">
-      <FileInfo>
-        <Attr Name="AutoDisabled" Val="1"/>
-        <Attr Name="ImportPath" Val="$PPRDIR/../tb_ultrasonic_sensor.v"/>
-        <Attr Name="ImportTime" Val="1793751980"/>
-        <Attr Name="UsedIn" Val="synthesis"/>
-        <Attr Name="UsedIn" Val="implementation"/>
-        <Attr Name="UsedIn" Val="simulation"/>
-      </FileInfo>
-    </File>
     <Config>
       <Option Name="DesignMode" Val="RTL"/>
       <Option Name="TopModule" Val="top_i2c_slave"/>
@@ -161,7 +151,9 @@
     </Config>
   </FileSet>
   <Strategy Version="1" Minor="2">
-    <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2020"/>
+    <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2020">
+      <Desc>Default settings for Implementation.</Desc>
+    </StratHandle>
     <Step Id="init_design"/>
     <Step Id="opt_design"/>
     <Step Id="power_opt_design"/>
@@ -170,6 +162,8 @@
     <Step Id="phys_opt_design"/>
     <Step Id="route_design"/>
     <Step Id="post_route_phys_opt_design"/>
-    <Step Id="write_bitstream"/>
+    <Step Id="write_bitstream">
+      <Option Id="BinFile">1</Option>
+    </Step>
   </Strategy>
 </GenRun>

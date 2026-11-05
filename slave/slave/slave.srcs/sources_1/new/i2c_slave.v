@@ -5,13 +5,13 @@
 module i2c_slave #(
     parameter [6:0] ADDRESS = 7'h42
 ) (
-    input wire clk,
+    input clk,
     rst,
-    input wire scl,
-    inout wire sda,
-    input wire [7:0] temperature,
+    input scl,
+    inout sda,
+    input [7:0] temperature,
     humidity,
-    input wire [8:0] distance,
+    input [8:0] distance,
     output reg [7:0] received_data,
     output reg write_toggle, read_toggle, active
 );

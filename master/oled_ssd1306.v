@@ -12,6 +12,7 @@ module oled_ssd1306 #(
     input wire [7:0] temperature, humidity,
     input wire [8:0] distance,
     input wire data_valid,
+    input wire standby,
     output reg sda_low, scl_low,
     output reg ready, busy, done, error
 );
@@ -32,6 +33,10 @@ module oled_ssd1306 #(
     reg [7:0] temp_buf, humidity_buf;
     reg [8:0] distance_buf;
     reg valid_buf;
+    reg standby_buf;
+    reg [6:0] ball_x;
+    reg [5:0] ball_y;
+    reg ball_left, ball_up;
     wire tick = (divider == DIV-1);
     wire [10:0] pixel_index = byte_index - 2;
 
@@ -148,25 +153,64 @@ module oled_ssd1306 #(
     reg [2:0] page;
     reg [4:0] position;
     reg [3:0] subcolumn;
-    reg [11:0] row0, row1, row2;
+    reg [11:0] row_pixels;
     begin
       column = index[6:0];
       page = index[9:7];
       position = column / 9;
       subcolumn = column % 9;
-      row0 = enlarged_column(0, position, subcolumn);
-      row1 = enlarged_column(1, position, subcolumn);
-      row2 = enlarged_column(2, position, subcolumn);
+      // 각 문자 줄은 두 페이지를 사용하고, 세 번째 페이지는 비운다.
+      row_pixels = enlarged_column(page / 3, position, subcolumn);
       case (page)
-        0: pixel = {row0[5:0], 2'b00};
-        1: pixel = {2'b00, row0[11:6]};
-        2: pixel = 0;
-        3: pixel = {row1[5:0], 2'b00};
-        4: pixel = {2'b00, row1[11:6]};
-        5: pixel = 0;
-        6: pixel = {row2[5:0], 2'b00};
-        7: pixel = {2'b00, row2[11:6]};
+        0, 3, 6: pixel = {row_pixels[5:0], 2'b00};
+        1, 4, 7: pixel = {2'b00, row_pixels[11:6]};
+        default: pixel = 0;
       endcase
+    end
+  endfunction
+
+  // 16x16 공. 밝은 부분과 점무늬로 단색 OLED에서 입체감을 표현한다.
+  function [15:0] ball_row;
+    input [3:0] row;
+    begin
+      case (row)
+        0, 15: ball_row = 16'b0000011111100000;
+        1, 14: ball_row = 16'b0001111111111000;
+        2:     ball_row = 16'b0011111111111100;
+        3:     ball_row = 16'b0111111111010110;
+        4:     ball_row = 16'b0111111111101010;
+        5:     ball_row = 16'b1111111111010101;
+        6:     ball_row = 16'b1111111111101011;
+        7:     ball_row = 16'b1111111111010101;
+        8:     ball_row = 16'b1111111110101011;
+        9:     ball_row = 16'b1111111101010101;
+        10:    ball_row = 16'b1111111010101011;
+        11:    ball_row = 16'b0111110101010100;
+        12:    ball_row = 16'b0111101010101010;
+        13:    ball_row = 16'b0011010101010100;
+        default: ball_row = 0;
+      endcase
+    end
+  endfunction
+
+  function [7:0] standby_pixel;
+    input [10:0] index;
+    integer x, y, dx, dy, bit_no;
+    reg [15:0] pattern;
+    begin
+      x = index[6:0];
+      standby_pixel = 0;
+      for (bit_no = 0; bit_no < 8; bit_no = bit_no + 1) begin
+        y = index[9:7] * 8 + bit_no;
+        dx = x - ball_x;
+        dy = y - ball_y;
+        if (x == 0 || x == 127 || y == 0 || y == 63)
+          standby_pixel[bit_no] = 1;
+        else if (dx >= 0 && dx < 16 && dy >= 0 && dy < 16) begin
+          pattern = ball_row(dy);
+          standby_pixel[bit_no] = pattern[15-dx];
+        end
+      end
     end
   endfunction
 
@@ -190,12 +234,30 @@ module oled_ssd1306 #(
             bit_index <= 0; tx_byte <= 0; data_mode <= 0;
             initialized <= 0; init_sequence <= 1;
             temp_buf <= 0; humidity_buf <= 0; distance_buf <= 0; valid_buf <= 0;
+            standby_buf <= 0; ball_x <= 20; ball_y <= 18; ball_left <= 0; ball_up <= 0;
         end else begin
             done <= 0;
             if (state == IDLE) begin
                 if (start && ready) begin
                     temp_buf <= temperature; humidity_buf <= humidity;
                     distance_buf <= distance; valid_buf <= data_valid;
+                    standby_buf <= standby;
+                    if (standby) begin
+                      if (ball_left) begin
+                        if (ball_x <= 4) begin ball_x <= 1; ball_left <= 0; end
+                        else ball_x <= ball_x - 3;
+                      end else begin
+                        if (ball_x >= 107) begin ball_x <= 111; ball_left <= 1; end
+                        else ball_x <= ball_x + 3;
+                      end
+                      if (ball_up) begin
+                        if (ball_y <= 3) begin ball_y <= 1; ball_up <= 0; end
+                        else ball_y <= ball_y - 2;
+                      end else begin
+                        if (ball_y >= 45) begin ball_y <= 47; ball_up <= 1; end
+                        else ball_y <= ball_y + 2;
+                      end
+                    end
                     busy <= 1; error <= 0; data_mode <= 0;
                     init_sequence <= !initialized;
                     byte_index <= 0; phase <= 0; state <= START;
@@ -213,6 +275,7 @@ module oled_ssd1306 #(
                     else if (byte_index == 1) tx_byte <= data_mode ? 8'h40 : 8'h00;
                     // Refresh: only reset the column/page address window.
                     else if (!data_mode) tx_byte <= command(init_sequence ? byte_index-2 : byte_index+24);
+                    else if (standby_buf) tx_byte <= standby_pixel(pixel_index);
                     else tx_byte <= pixel(pixel_index);
                     bit_index <= 7; phase <= 0; state <= SEND;
                   end

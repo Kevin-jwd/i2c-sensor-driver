@@ -16,6 +16,7 @@ module top_i2c_master #(
 );
   // 센서 값을 0.5초마다 읽는다. 버튼으로 즉시 읽기도 가능하다.
   localparam integer POLL_CYCLES = CLK_HZ / 2;
+  localparam ACTIVE_DISTANCE_CM = 50;
   localparam integer POLL_WIDTH = (POLL_CYCLES > 1) ? $clog2(POLL_CYCLES) : 1;
   reg [POLL_WIDTH-1:0] poll_count;
   reg start_meta, start_sync, start_prev;
@@ -53,6 +54,8 @@ module top_i2c_master #(
       end else poll_count <= poll_count + 1'b1;
       if (start_pulse) pending_read <= 1;
       if (done && !error) pending_oled <= 1;
+      if (oled_done && !oled_error && valid && distance > ACTIVE_DISTANCE_CM)
+        pending_oled <= 1;
       if (oled_done) oled_failed <= oled_error;
       // 두 전송기는 같은 버스를 공유하므로 한 번에 하나만 시작한다.
       if (!busy && !oled_busy && !sensor_start && !oled_start) begin
@@ -95,7 +98,8 @@ module top_i2c_master #(
   oled_ssd1306 #(.CLK_HZ(CLK_HZ), .I2C_HZ(I2C_HZ), .HEIGHT(OLED_HEIGHT)) u_oled (
       .clk(clk), .rst(rst), .start(oled_start), .sda(sda),
       .temperature(temperature), .humidity(humidity), .distance(distance),
-      .data_valid(valid), .sda_low(oled_sda_low), .scl_low(oled_scl_low),
+      .data_valid(valid), .standby(valid && distance > ACTIVE_DISTANCE_CM),
+      .sda_low(oled_sda_low), .scl_low(oled_scl_low),
       .ready(oled_ready), .busy(oled_busy), .done(oled_done), .error(oled_error)
   );
   tick_generator #(
